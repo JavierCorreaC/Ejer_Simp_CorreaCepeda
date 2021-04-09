@@ -104,7 +104,7 @@
               <!-- Card Secundario -->
               <v-expand-transition>
                 <v-card
-                  style="overflow: auto"
+                  style="overflow: auto;bottom: 0;opacity: 1 !important;position: absolute;width: 100%;height: 100%;right: 0px;"
                   v-if="reveal[index]"
                   class="transition-fast-in-fast-out v-card--reveal"
                   elevation="2"
@@ -199,6 +199,7 @@
 				></v-data-table>
 			</v-card> -->
 
+    <!-- Vista 2 -->
     <v-expansion-panels v-if="!viewsBool">
       <v-expansion-panel v-for="(item, index, i) in dataURL" :key="i">
         <v-expansion-panel-header>
@@ -227,6 +228,7 @@
           </v-layout>
         </v-expansion-panel-header>
 
+        <!-- Contenido Expansion Panel -->
         <v-expansion-panel-content>
           <h3 class="text-center">
             {{ item.categorias_exp.slice(5, item.categorias_exp.lenght) }}
@@ -371,3 +373,14 @@ export default {
   },
 };
 </script>
+
+<style>
+  .v-card--reveal {
+    bottom: 0;
+    opacity: 1 !important;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    right: 0px;
+  }
+</style>
