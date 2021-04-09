@@ -1,67 +1,373 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
+    <!-- Navbar -->
+    <v-card>
+      <v-tabs>
+        <v-tab
+          v-for="(item, index, i) in views"
+          :key="i"
+          @click="tabsClick(index)"
+          >{{ item }}</v-tab
+        >
+      </v-tabs>
+    </v-card>
+
+    <!-- Vista 1 -->
+    <!-- Skeleton -->
+    <v-row
+      v-if="viewsBool && !dataURL"
+      no-gutters
+      align="start"
+      justify="center"
     >
-    <p>{{dataURL}}</p>
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
+      <v-col v-for="index in 9" :key="index" cols="12" lg="4" md="4" sm="6">
+        <v-sheet color="blue-grey lighten-5">
+          <v-container>
+            <v-card height="350px">
+              <v-skeleton-loader type="card"></v-skeleton-loader>
+            </v-card>
+          </v-container>
+        </v-sheet>
+      </v-col>
+    </v-row>
 
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
+    <!-- Card Principal -->
+    <v-row v-if="viewsBool" no-gutters align="start" justify="center">
+      <v-col
+        v-for="(item, index, i) in dataURL"
+        :key="i"
+        cols="12"
+        lg="4"
+        md="4"
+        sm="6"
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-app-bar>
+        <v-container>
+          <v-card min-height="350px" elevation="2" outlined shaped>
+            <v-container>
+              <v-row justify="end">
+                <v-col cols="8" align="center">
+                  <v-img
+                    :src="require('./assets/' + item.siglas + '.png')"
+                    width="50%"
+                  ></v-img>
+                </v-col>
+                <v-col cols="2">
+                  <v-icon
+                    v-if="outlineIcon[index]"
+                    large
+                    color="blue darken-2"
+                    @click="changeIcon(index)"
+                    >mdi-bookmark-outline</v-icon
+                  >
+                  <v-icon
+                    v-if="!outlineIcon[index]"
+                    large
+                    color="blue darken-2"
+                    @click="changeIcon(index)"
+                    >mdi-bookmark</v-icon
+                  >
+                </v-col>
+              </v-row>
+              <h3 class="text-center">
+                {{ item.institucion }} ({{ item.siglas }}) - {{ item.entidad }}
+              </h3>
+              <v-card-subtitle class="text-center" style="font-weight: bold">
+                {{ item.categorias_exp.slice(5, item.categorias_exp.lenght) }}
+              </v-card-subtitle>
+              <v-card-text class="text-center" style="font-weight: bold">
+                Tipo de cont: {{ item.tipo_cont }}
+              </v-card-text>
+              <v-card-actions right>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="
+                    revealItemCards(index);
+                    cardReveal = true;
+                  "
+                  >Descripción
+                  <v-icon right>mdi-chevron-right</v-icon>
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="
+                    revealItemCards(index);
+                    cardReveal = false;
+                  "
+                  >Detalles
+                  <v-icon right>mdi-chevron-right</v-icon>
+                </v-btn>
+              </v-card-actions>
 
-    <v-main>
-      <HelloWorld/>
-    </v-main>
+              <!-- Card Secundario -->
+              <v-expand-transition>
+                <v-card
+                  style="overflow: auto"
+                  v-if="reveal[index]"
+                  class="transition-fast-in-fast-out v-card--reveal"
+                  elevation="2"
+                  outlined
+                  shaped
+                >
+                  <v-container>
+                    <h3 class="text-center">
+                      {{ item.siglas }} - {{ item.entidad }}
+                    </h3>
+
+                    <!-- Descripción -->
+                    <div v-if="cardReveal">
+                      <h3 class="text-center">Descripción</h3>
+                      <v-card-text>
+                        <p>{{ item.desc_exp }}</p>
+                        <p>
+                          <span style="font-weight: bold">Procedimiento: </span>
+                          {{ item.caracter_procedimiento }}
+                        </p>
+                        <p>
+                          <span style="font-weight: bold">Medio: </span>
+                          {{ item.medio_forma }}
+                        </p>
+                        <p>
+                          <span style="font-weight: bold"
+                            >Hora y lugar de aclaraciones:</span
+                          >
+                          {{ item.hora_lugar_de_junta_de_aclaraciones }}
+                        </p>
+                      </v-card-text>
+                    </div>
+
+                    <!-- Detalles -->
+                    <div v-if="!cardReveal">
+                      <h3 class="text-center">Detalles</h3>
+                      <v-card-text>
+                        <p>
+                          <span style="font-weight: bold"
+                            >Primera Publicación:
+                          </span>
+                          {{ item.primera_pub }}
+                        </p>
+                        <p>
+                          <span style="font-weight: bold">Plazo: </span>
+                          {{ item.plazo }}
+                        </p>
+                        <p>
+                          <span style="font-weight: bold">Operador: </span>
+                          {{ item.operador }}
+                        </p>
+                        <p>
+                          <span style="font-weight: bold">E-mail: </span>
+                          {{ item.correo }}
+                        </p>
+                      </v-card-text>
+                    </div>
+
+                    <v-card-actions>
+                      <v-btn text color="primary" @click="hideItemCards(index)"
+                        >Cerrar</v-btn
+                      >
+                    </v-card-actions>
+                  </v-container>
+                </v-card>
+              </v-expand-transition>
+            </v-container>
+          </v-card>
+        </v-container>
+      </v-col>
+    </v-row>
+
+    <!-- Vista 2 -->
+    <br />
+    <!-- 			<v-card>
+				<v-card-title>
+					<v-text-field
+						v-model="search"
+						append-icon="mdi-magnify"
+						label="Search"
+						single-line
+						hide-details
+					></v-text-field>
+				</v-card-title>
+				<v-data-table
+					v-if="!viewsBool"
+					:headers="headers"
+					:items="dataURL"
+					:items-per-page="15"
+					class="elevation-1"
+					:search="search"
+				></v-data-table>
+			</v-card> -->
+
+    <v-expansion-panels v-if="!viewsBool">
+      <v-expansion-panel v-for="(item, index, i) in dataURL" :key="i">
+        <v-expansion-panel-header>
+          <v-layout>
+            <v-flex>
+              <v-icon
+                v-if="outlineIcon[index]"
+                color="yellow darken-2"
+                @click="changeIcon(index)"
+              >
+                mdi-star-outline
+              </v-icon>
+              <v-icon
+                v-if="!outlineIcon[index]"
+                color="yellow darken-2"
+                @click="changeIcon(index)"
+              >
+                mdi-star
+              </v-icon>
+            </v-flex>
+            <v-flex xl12 md12 xs12>
+              <p style="font-weight: bold">
+                {{ item.institucion }} ({{ item.siglas }}) - {{ item.entidad }}
+              </p>
+            </v-flex>
+          </v-layout>
+        </v-expansion-panel-header>
+
+        <v-expansion-panel-content>
+          <h3 class="text-center">
+            {{ item.categorias_exp.slice(5, item.categorias_exp.lenght) }}
+          </h3>
+          <h4 class="text-center">{{ item.tipo_cont }}</h4>
+          <br />
+          <v-row align="start" justify="start">
+            <v-col cols="12" lg="2" md="2" sm="12" align="center">
+              <v-img
+                :src="require('./assets/' + item.siglas + '.png')"
+                width="150px"
+              ></v-img>
+            </v-col>
+            <v-divider vertical></v-divider>
+            <v-col cols="12" lg="3" md="3" sm="12" align="center">
+              <p>
+                <span style="font-weight: bold">Primera Publicación: </span>
+                {{ item.primera_pub }}
+              </p>
+              <p>
+                <span style="font-weight: bold">Plazo: </span> {{ item.plazo }}
+              </p>
+              <p>
+                <span style="font-weight: bold">Operador: </span>
+                {{ item.operador }}
+              </p>
+              <p>
+                <span style="font-weight: bold">E-mail: </span>
+                {{ item.correo }}
+              </p>
+            </v-col>
+            <v-divider vertical></v-divider>
+            <v-col cols="12" lg="7" md="7" sm="12" align="center">
+              <p>
+                <span style="font-weight: bold">Descripción: </span>
+                {{ item.desc_exp }}
+              </p>
+              <p>
+                <span style="font-weight: bold">Procedimiento: </span>
+                {{ item.caracter_procedimiento }}
+              </p>
+              <p>
+                <span style="font-weight: bold">Medio: </span>
+                {{ item.medio_forma }}
+              </p>
+              <p>
+                <span style="font-weight: bold"
+                  >Hora y lugar de aclaraciones:</span
+                >
+                {{ item.hora_lugar_de_junta_de_aclaraciones }}
+              </p>
+            </v-col>
+          </v-row>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
 import axios from "axios";
 
 export default {
-  name: 'App',
-
-  components: {
-    HelloWorld,
-  },
+  name: "App",
 
   data: () => ({
-    dataURL:null,
+    search: "",
+    headers: [
+      {
+        text: "ID",
+        align: "start",
+        sortable: false,
+        value: "id_simplicita",
+      },
+      { text: "Fecha Creación", value: "creado", sortable: true },
+      { text: "Plazo", value: "plazo", sortable: true },
+      {
+        text: "Procedimiento",
+        value: "caracter_procedimiento",
+        sortable: true,
+      },
+      { text: "Entidad", value: "entidad", sortable: true },
+      { text: "Institución", value: "siglas", sortable: true },
+      { text: "Medio", value: "medio_forma", sortable: true },
+    ],
+    dataURL: null,
+    views: ["Vista uno", "Vista dos"],
+    viewsBool: true,
+    reveal: [],
+    outlineIcon: [],
+    cardReveal: true,
   }),
-  mounted () {
-    axios
-      .get('https://simplicita.tk:8000/buscar/medicina')
-      .then(response => (this.dataURL = response))
+  methods: {
+    tabsClick(index) {
+      switch (index) {
+        case 0:
+          this.viewsBool = true;
+          break;
+        case 1:
+          this.viewsBool = false;
+          break;
+      }
+    },
+    revealItemCards(index) {
+      var bool = this.reveal;
+      for (var i = 0; i < this.dataURL.length; i++) {
+        if (this.reveal[i] == true) {
+          bool[i] = false;
+        }
+      }
+      bool[index] = true;
+      this.reveal = [];
+      this.reveal = bool;
+    },
+    hideItemCards(index) {
+      var bool = this.reveal;
+      bool[index] = false;
+      this.reveal = [];
+      this.reveal = bool;
+    },
+    changeIcon(index) {
+      var icons = this.outlineIcon;
+      if (this.outlineIcon[index] == true) {
+        icons[index] = false;
+      } else {
+        icons[index] = true;
+      }
+      this.outlineIcon = [];
+      this.outlineIcon = icons;
+    },
+  },
+  mounted() {
+    axios.get("https://simplicita.tk:8000/buscar/medicina").then(
+      function (response) {
+        this.dataURL = response.data;
+        for (var i = 0; i < this.dataURL.length; i++) {
+          this.reveal.push(false);
+          this.outlineIcon.push(true);
+        }
+      }.bind(this)
+    );
   },
 };
 </script>
