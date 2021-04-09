@@ -5,6 +5,7 @@
       color="primary"
       dark
     >
+    <p>{{dataURL}}</p>
       <div class="d-flex align-center">
         <v-img
           alt="Vuetify Logo"
@@ -45,6 +46,7 @@
 
 <script>
 import HelloWorld from './components/HelloWorld';
+import axios from "axios";
 
 export default {
   name: 'App',
@@ -54,7 +56,12 @@ export default {
   },
 
   data: () => ({
-    //
+    dataURL:null,
   }),
+  mounted () {
+    axios
+      .get('https://simplicita.tk:8000/buscar/medicina')
+      .then(response => (this.dataURL = response))
+  },
 };
 </script>
